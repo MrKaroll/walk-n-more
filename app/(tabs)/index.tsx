@@ -7,9 +7,17 @@ export default function TabHomeScreen() {
   const [steps, setSteps] = useState<number | string>("loading...");
 
   useEffect(() => {
-    StepModule.getStepCount()
-      .then((value: number) => setSteps(value))
-      .catch((error: unknown) => setSteps(String(error)));
+    const loadSteps = () => {
+      StepModule.getStepCount()
+        .then((value: number) => setSteps(value))
+        .catch((error: unknown) => setSteps(String(error)));
+    };
+
+    loadSteps();
+
+    const interval = setInterval(loadSteps, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
