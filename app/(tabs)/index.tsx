@@ -1,156 +1,205 @@
-import { useEffect, useRef, useState } from "react";
-import { View, Text, NativeModules, Pressable } from "react-native";
-import Svg, { Circle } from "react-native-svg";
+import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-const { StepModule } = NativeModules;
-
-const DAILY_GOAL = 8000;
-const CIRCLE_SIZE = 240;
-const STROKE_WIDTH = 18;
-const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
-}
-
-export default function TabHomeScreen() {
-  const [steps, setSteps] = useState<number>(0);
-  const [todayKey, setTodayKey] = useState(getTodayKey());
-
-  const lastDateRef = useRef(getTodayKey());
-
-  const progress = Math.min(steps / DAILY_GOAL, 1);
-  const strokeDashoffset = CIRCUMFERENCE * (1 - progress);
-
-  const loadSteps = () => {
-    const currentDate = getTodayKey();
-
-    if (currentDate !== lastDateRef.current) {
-      lastDateRef.current = currentDate;
-      setTodayKey(currentDate);
-    }
-
-    StepModule.getStepCount()
-      .then((value: number) => setSteps(value))
-      .catch(() => setSteps(0));
-  };
-
-  const resetSteps = () => {
-    StepModule.resetTodaySteps()
-      .then(() => loadSteps())
-      .catch(() => setSteps(0));
-  };
-
-  useEffect(() => {
-    loadSteps();
-
-    const interval = setInterval(loadSteps, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
+export default function HomeScreen() {
+  const steps = 1234;
+  const goal = 8000;
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#f6f7fb",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 24,
-      }}
+    <LinearGradient
+      colors={['#F3FFF8', '#EEF9FF', '#F7F9FC']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.screen}
     >
-      <Text style={{ fontSize: 18, color: "#6b7280", marginBottom: 12 }}>
-        {todayKey}
-      </Text>
+      <Text style={styles.title}>Walk N More</Text>
 
-      <Text
-        style={{
-          fontSize: 30,
-          color: "#111827",
-          fontWeight: "700",
-          marginBottom: 28,
-        }}
-      >
-        Tänased sammud
-      </Text>
+      <View style={styles.heroCard}>
 
-      <View
-        style={{
-          width: CIRCLE_SIZE,
-          height: CIRCLE_SIZE,
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: 28,
-        }}
-      >
-        <Svg width={CIRCLE_SIZE} height={CIRCLE_SIZE}>
-          <Circle
-            cx={CIRCLE_SIZE / 2}
-            cy={CIRCLE_SIZE / 2}
-            r={RADIUS}
-            stroke="#e5e7eb"
-            strokeWidth={STROKE_WIDTH}
-            fill="none"
-          />
+        <View style={styles.brandBlock}>
+          <Text style={styles.brandTitle}>Walk N More</Text>
 
-          <Circle
-            cx={CIRCLE_SIZE / 2}
-            cy={CIRCLE_SIZE / 2}
-            r={RADIUS}
-            stroke="#111827"
-            strokeWidth={STROKE_WIDTH}
-            fill="none"
-            strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            rotation="-90"
-            originX={CIRCLE_SIZE / 2}
-            originY={CIRCLE_SIZE / 2}
-          />
-        </Svg>
-
-        <View style={{ position: "absolute", alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 52,
-              fontWeight: "800",
-              color: "#111827",
-            }}
-          >
-            {steps}
+          <Text style={styles.brandTagline}>
+            WALK • RESET • BE BETTER
           </Text>
+        </View>
 
-          <Text style={{ fontSize: 16, color: "#6b7280" }}>
-            / {DAILY_GOAL} sammu
-          </Text>
+        <Text style={styles.cardLabel}>Daily steps</Text>
 
-          <Text
-            style={{
-              fontSize: 18,
-              color: "#111827",
-              fontWeight: "600",
-              marginTop: 6,
-            }}
-          >
-            {Math.round(progress * 100)}%
-          </Text>
+        <View style={styles.progressCircle}>
+          <Text style={styles.steps}>{steps}</Text>
+          <Text style={styles.stepsLabel}>steps</Text>
+        </View>
+
+        <Text style={styles.goalText}>
+          Goal: {goal}
+        </Text>
+      </View>
+
+      <View style={styles.statsRow}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>0.9 km</Text>
+          <Text style={styles.statLabel}>Distance</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>48 kcal</Text>
+          <Text style={styles.statLabel}>Calories</Text>
         </View>
       </View>
 
-      <Pressable
-        onPress={resetSteps}
-        style={{
-          backgroundColor: "#111827",
-          paddingVertical: 14,
-          paddingHorizontal: 26,
-          borderRadius: 16,
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 17, fontWeight: "600" }}>
-          Nulli tänased sammud
+      <View style={styles.motivationCard}>
+        <Text style={styles.motivationTitle}>
+          One step at a time.
         </Text>
-      </Pressable>
-    </View>
+
+        <Text style={styles.motivationText}>
+          Small walks still count.
+        </Text>
+      </View>
+
+      <TouchableOpacity style={styles.primaryButton}>
+        <Text style={styles.primaryButtonText}>
+          Start walking
+        </Text>
+      </TouchableOpacity>
+    </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#F7F9FC',
+    padding: 24,
+    paddingTop: 70,
+  },
+
+  title: {
+    fontSize: 34,
+    fontWeight: '800',
+    color: '#061A4A',
+    marginBottom: 24,
+  },
+
+  heroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 30,
+    padding: 24,
+    alignItems: 'center',
+  },
+
+  cardLabel: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginBottom: 20,
+  },
+
+  progressCircle: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 12,
+    borderColor: '#00D5B5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8FDFF',
+  },
+
+  steps: {
+    fontSize: 42,
+    fontWeight: '900',
+    color: '#061A4A',
+  },
+
+  stepsLabel: {
+    fontSize: 15,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+
+  goalText: {
+    marginTop: 20,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#008CFF',
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: 18,
+    gap: 14,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+  },
+
+  statValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#061A4A',
+  },
+
+  statLabel: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 6,
+  },
+
+  motivationCard: {
+    backgroundColor: '#EEF7FF',
+    borderRadius: 24,
+    padding: 22,
+    marginTop: 18,
+  },
+
+  motivationTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#061A4A',
+  },
+
+  motivationText: {
+    fontSize: 15,
+    color: '#4B5563',
+    marginTop: 8,
+  },
+
+  primaryButton: {
+    height: 58,
+    borderRadius: 22,
+    backgroundColor: '#061A4A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 22,
+  },
+
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '800',
+  },
+
+brandBlock: {
+  alignItems: 'center',
+  marginBottom: 22,
+},
+
+brandTitle: {
+  fontSize: 28,
+  fontWeight: '900',
+  color: '#061A4A',
+},
+
+brandTagline: {
+  marginTop: 6,
+  fontSize: 12,
+  fontWeight: '800',
+  color: '#008CFF',
+  letterSpacing: 1.2,
+},
+});
