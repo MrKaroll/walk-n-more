@@ -1,9 +1,28 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { requireNativeModule } from 'expo-modules-core';
+import ProgressRing from '../../components/ProgressRing';
+
+const StepModule = requireNativeModule('StepModule');
 
 export default function HomeScreen() {
-  const steps = 1234;
+  const [steps, setSteps] = useState(0);
   const goal = 8000;
+
+ useEffect(() => {
+   const interval = setInterval(async () => {
+     try {
+       const value = await StepModule.getSteps();
+
+       setSteps(value);
+     } catch (error) {
+       console.log('StepModule error:', error);
+     }
+   }, 1000);
+
+   return () => clearInterval(interval);
+ }, []);
 
   return (
     <LinearGradient
@@ -26,10 +45,10 @@ export default function HomeScreen() {
 
         <Text style={styles.cardLabel}>Daily steps</Text>
 
-        <View style={styles.progressCircle}>
-          <Text style={styles.steps}>{steps}</Text>
-          <Text style={styles.stepsLabel}>steps</Text>
-        </View>
+<ProgressRing
+  progress={steps / goal}
+  steps={steps}
+/>
 
         <Text style={styles.goalText}>
           Goal: {goal}
@@ -95,28 +114,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  progressCircle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 12,
-    borderColor: '#00D5B5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#F8FDFF',
-  },
-
-  steps: {
-    fontSize: 42,
-    fontWeight: '900',
-    color: '#061A4A',
-  },
-
-  stepsLabel: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginTop: 4,
-  },
 
   goalText: {
     marginTop: 20,
