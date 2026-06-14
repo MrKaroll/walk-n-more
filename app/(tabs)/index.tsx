@@ -1,10 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import { useEffect, useState } from 'react';
-import { requireNativeModule } from 'expo-modules-core';
 import ProgressRing from '../../components/ProgressRing';
-
-const StepModule = requireNativeModule('StepModule');
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
@@ -13,7 +10,7 @@ export default function HomeScreen() {
  useEffect(() => {
    const interval = setInterval(async () => {
      try {
-       const value = await StepModule.getSteps();
+       const value = await NativeModules.StepModule.getSteps();
 
        setSteps(value);
      } catch (error) {
