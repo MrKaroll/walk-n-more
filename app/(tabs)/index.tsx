@@ -1,8 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { View, Text, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, NativeModules, ScrollView } from 'react-native';
 import { useEffect, useState } from 'react';
 import ProgressRing from '../../components/ProgressRing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import WeeklyGraph from '../../components/WeeklyGraph';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
@@ -70,38 +71,28 @@ export default function HomeScreen() {
     }
   }, [steps]);
 
-  return (
-
-    <LinearGradient
-      colors={['#F3FFF8', '#EEF9FF', '#F7F9FC']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.screen}
-    >
+return (
+  <LinearGradient
+    colors={['#F3FFF8', '#EEF9FF', '#F7F9FC']}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+    style={styles.screen}
+  >
+    <ScrollView showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Walk N More</Text>
 
       <View style={styles.heroCard}>
-
         <View style={styles.brandBlock}>
           <Text style={styles.brandTitle}>Walk N More</Text>
-
-          <Text style={styles.brandTagline}>
-            WALK • RESET • BE BETTER
-          </Text>
+          <Text style={styles.brandTagline}>WALK • RESET • BE BETTER</Text>
         </View>
 
         <Text style={styles.cardLabel}>Daily steps</Text>
 
-<ProgressRing
-  progress={steps / goal}
-  steps={steps}
-/>
+        <ProgressRing progress={steps / goal} steps={steps} />
 
-        <Text style={styles.goalText}>
-          Goal: {goal}
-        </Text>
+        <Text style={styles.goalText}>Goal: {goal}</Text>
       </View>
-
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
@@ -116,22 +107,18 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.motivationCard}>
-        <Text style={styles.motivationTitle}>
-          One step at a time.
-        </Text>
-
-        <Text style={styles.motivationText}>
-          Small walks still count.
-        </Text>
+        <Text style={styles.motivationTitle}>One step at a time.</Text>
+        <Text style={styles.motivationText}>Small walks still count.</Text>
       </View>
 
       <TouchableOpacity style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>
-          Start walking
-        </Text>
+        <Text style={styles.primaryButtonText}>Start walking</Text>
       </TouchableOpacity>
-    </LinearGradient>
-  );
+
+      <WeeklyGraph history={history} />
+    </ScrollView>
+  </LinearGradient>
+);
 }
 
 const styles = StyleSheet.create({

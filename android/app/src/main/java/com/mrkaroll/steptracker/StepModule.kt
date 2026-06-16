@@ -16,7 +16,7 @@ class StepModule(
 
     private var sensorManager: SensorManager? = null
     private var stepSensor: Sensor? = null
-    private var steps: Int = -1
+    private var steps: Int = 0
 
     init {
         sensorManager =
