@@ -2,26 +2,76 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { View, Text, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import { useEffect, useState } from 'react';
 import ProgressRing from '../../components/ProgressRing';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
+  const [history, setHistory] = useState<Record<string, number>>({});
   const goal = 8000;
 
- useEffect(() => {
-   const interval = setInterval(async () => {
-     try {
-       const value = await NativeModules.StepModule.getSteps();
+  // 1. Sammude lugemine
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const value = await NativeModules.StepModule.getSteps();
+        setSteps(value);
+      } catch (error) {
+        console.log('StepModule error:', error);
+      }
+    }, 1000);
 
-       setSteps(value);
-     } catch (error) {
-       console.log('StepModule error:', error);
-     }
-   }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-   return () => clearInterval(interval);
- }, []);
+  // 2. History laadimine
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('stepHistory');
+
+        if (stored) {
+          setHistory(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    loadHistory();
+  }, []);
+
+  // 3. Tänase päeva salvestamine
+  useEffect(() => {
+    const saveTodaySteps = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        const stored =
+          await AsyncStorage.getItem('stepHistory');
+
+        const historyData =
+          stored ? JSON.parse(stored) : {};
+
+        historyData[today] = steps;
+
+        await AsyncStorage.setItem(
+          'stepHistory',
+          JSON.stringify(historyData)
+        );
+
+        setHistory(historyData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (steps > 0) {
+      saveTodaySteps();
+    }
+  }, [steps]);
 
   return (
+
     <LinearGradient
       colors={['#F3FFF8', '#EEF9FF', '#F7F9FC']}
       start={{ x: 0, y: 0 }}
@@ -51,6 +101,7 @@ export default function HomeScreen() {
           Goal: {goal}
         </Text>
       </View>
+
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
