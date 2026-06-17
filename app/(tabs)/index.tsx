@@ -6,17 +6,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeeklyGraph from '../../components/WeeklyGraph';
 import DailyGoalCard from '../../components/DailyGoalCard';
 import GoalSelector from '../../components/GoalSelector';
+import ExerciseCard from '../../components/ExerciseCard';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
   const [history, setHistory] = useState<Record<string, number>>({});
   const [goal, setGoal] = useState(8000);
+  const [isExerciseActive, setIsExerciseActive] = useState(false);
+  const [exerciseStartSteps, setExerciseStartSteps] = useState(0);
+  const [exerciseSteps, setExerciseSteps] = useState(0);
 
   const stepLengthMeters = 0.75;
   const caloriesPerStep = 0.04;
 
   const distanceKm = ((steps * stepLengthMeters) / 1000).toFixed(1);
   const calories = Math.round(steps * caloriesPerStep);
+
+  const exerciseDistanceKm = ((exerciseSteps * stepLengthMeters) / 1000).toFixed(2);
+  const exerciseCalories = Math.round(exerciseSteps * caloriesPerStep);
 
 useEffect(() => {
   const loadGoal = async () => {
@@ -125,6 +132,29 @@ const handleChangeGoal = async (newGoal: number) => {
   }
 };
 
+useEffect(() => {
+  if (isExerciseActive) {
+    const currentExerciseSteps = Math.max(steps - exerciseStartSteps, 0);
+    setExerciseSteps(currentExerciseSteps);
+  }
+}, [steps, isExerciseActive, exerciseStartSteps]);
+
+const handleStartExercise = () => {
+  setExerciseStartSteps(steps);
+  setExerciseSteps(0);
+  setIsExerciseActive(true);
+};
+
+const handleStopExercise = () => {
+  setIsExerciseActive(false);
+};
+
+const handleResetExercise = () => {
+  setIsExerciseActive(false);
+  setExerciseStartSteps(steps);
+  setExerciseSteps(0);
+};
+
   return (
     <LinearGradient colors={['#E8FDF8', '#EEF3FF']} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -136,6 +166,16 @@ const handleChangeGoal = async (newGoal: number) => {
           <DailyGoalCard steps={steps} goal={goal} />
 
           <GoalSelector goal={goal} onChangeGoal={handleChangeGoal} />
+
+<ExerciseCard
+  isActive={isExerciseActive}
+  exerciseSteps={exerciseSteps}
+  exerciseDistanceKm={exerciseDistanceKm}
+  exerciseCalories={exerciseCalories}
+  onStart={handleStartExercise}
+  onStop={handleStopExercise}
+  onReset={handleResetExercise}
+/>
 
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
