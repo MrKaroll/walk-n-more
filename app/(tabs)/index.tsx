@@ -4,14 +4,19 @@ import { useEffect, useState } from 'react';
 import ProgressRing from '../../components/ProgressRing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeeklyGraph from '../../components/WeeklyGraph';
-import DailyGoalCard from '../../components/DailyGoalCard';
 import GoalSelector from '../../components/GoalSelector';
 import ExerciseCard from '../../components/ExerciseCard';
+import ThemeToggle from '../../components/ThemeToggle';
+import { lightTheme, darkTheme } from '../../constants/theme';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
   const [history, setHistory] = useState<Record<string, number>>({});
   const [goal, setGoal] = useState(8000);
+
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const colors = isDarkMode ? darkTheme : lightTheme;
+
   const [isExerciseActive, setIsExerciseActive] = useState(false);
   const [exerciseStartSteps, setExerciseStartSteps] = useState(0);
   const [exerciseSteps, setExerciseSteps] = useState(0);
@@ -24,6 +29,22 @@ export default function HomeScreen() {
 
   const exerciseDistanceKm = ((exerciseSteps * stepLengthMeters) / 1000).toFixed(2);
   const exerciseCalories = Math.round(exerciseSteps * caloriesPerStep);
+
+useEffect(() => {
+  const loadTheme = async () => {
+    try {
+      const storedTheme = await AsyncStorage.getItem('themeMode');
+
+      if (storedTheme === 'dark') {
+        setIsDarkMode(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  loadTheme();
+}, []);
 
 useEffect(() => {
   const loadGoal = async () => {
@@ -132,6 +153,17 @@ const handleChangeGoal = async (newGoal: number) => {
   }
 };
 
+const handleToggleTheme = async () => {
+  try {
+    const nextValue = !isDarkMode;
+
+    setIsDarkMode(nextValue);
+    await AsyncStorage.setItem('themeMode', nextValue ? 'dark' : 'light');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 useEffect(() => {
   if (isExerciseActive) {
     const currentExerciseSteps = Math.max(steps - exerciseStartSteps, 0);
@@ -155,41 +187,46 @@ const handleResetExercise = () => {
   setExerciseSteps(0);
 };
 
-  return (
-    <LinearGradient colors={['#E8FDF8', '#EEF3FF']} style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Walk N More</Text>
+return (
+  <LinearGradient colors={colors.backgroundGradient} style={styles.container}>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: colors.text }]}>Walk N More</Text>
 
-          <ProgressRing steps={steps} goal={goal} />
+        <ThemeToggle
+          isDarkMode={isDarkMode}
+          onToggle={handleToggleTheme}
+          colors={colors}
+        />
 
-          <DailyGoalCard steps={steps} goal={goal} />
+          <ProgressRing steps={steps} goal={goal} colors={colors} />
 
-          <GoalSelector goal={goal} onChangeGoal={handleChangeGoal} />
+          <GoalSelector goal={goal} onChangeGoal={handleChangeGoal} colors={colors} />
 
-<ExerciseCard
-  isActive={isExerciseActive}
-  exerciseSteps={exerciseSteps}
-  exerciseDistanceKm={exerciseDistanceKm}
-  exerciseCalories={exerciseCalories}
-  onStart={handleStartExercise}
-  onStop={handleStopExercise}
-  onReset={handleResetExercise}
-/>
+          <ExerciseCard
+            isActive={isExerciseActive}
+            exerciseSteps={exerciseSteps}
+            exerciseDistanceKm={exerciseDistanceKm}
+            exerciseCalories={exerciseCalories}
+            onStart={handleStartExercise}
+            onStop={handleStopExercise}
+            onReset={handleResetExercise}
+            colors={colors}
+          />
 
-          <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{distanceKm} km</Text>
-              <Text style={styles.statLabel}>Distance</Text>
-            </View>
+<View style={styles.statsRow}>
+  <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+    <Text style={[styles.statValue, { color: colors.text }]}>{distanceKm} km</Text>
+    <Text style={[styles.statLabel, { color: colors.muted }]}>Distance</Text>
+  </View>
 
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{calories}</Text>
-              <Text style={styles.statLabel}>Calories</Text>
-            </View>
-          </View>
+  <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+    <Text style={[styles.statValue, { color: colors.text }]}>{calories}</Text>
+    <Text style={[styles.statLabel, { color: colors.muted }]}>Calories</Text>
+  </View>
+</View>
 
-          <WeeklyGraph history={history} />
+          <WeeklyGraph history={history} colors={colors} />
         </View>
       </ScrollView>
     </LinearGradient>

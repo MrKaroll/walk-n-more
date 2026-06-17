@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import type { ThemeColors } from '../constants/theme';
 
 type Props = {
   isActive: boolean;
@@ -8,6 +9,7 @@ type Props = {
   onStart: () => void;
   onStop: () => void;
   onReset: () => void;
+  colors: ThemeColors;
 };
 
 export default function ExerciseCard({
@@ -18,47 +20,77 @@ export default function ExerciseCard({
   onStart,
   onStop,
   onReset,
+  colors,
 }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.card }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Exercise Walk</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Exercise Walk</Text>
 
-        <View style={[styles.statusBadge, isActive && styles.activeBadge]}>
-          <Text style={[styles.statusText, isActive && styles.activeStatusText]}>
+        <View
+          style={[
+            styles.statusBadge,
+            { backgroundColor: colors.border },
+            isActive && { backgroundColor: colors.accent },
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              { color: colors.muted },
+              isActive && { color: colors.white },
+            ]}
+          >
             {isActive ? 'Active' : 'Stopped'}
           </Text>
         </View>
       </View>
 
-      <Text style={styles.steps}>{exerciseSteps}</Text>
-      <Text style={styles.label}>exercise steps</Text>
+      <Text style={[styles.steps, { color: colors.text }]}>{exerciseSteps}</Text>
+      <Text style={[styles.label, { color: colors.muted }]}>exercise steps</Text>
 
       <View style={styles.statsRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{exerciseDistanceKm} km</Text>
-          <Text style={styles.statLabel}>Distance</Text>
+        <View style={[styles.statBox, { backgroundColor: colors.cardAlt }]}>
+          <Text style={[styles.statValue, { color: colors.text }]}>
+            {exerciseDistanceKm} km
+          </Text>
+          <Text style={[styles.statLabel, { color: colors.muted }]}>Distance</Text>
         </View>
 
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{exerciseCalories}</Text>
-          <Text style={styles.statLabel}>Calories</Text>
+        <View style={[styles.statBox, { backgroundColor: colors.cardAlt }]}>
+          <Text style={[styles.statValue, { color: colors.text }]}>
+            {exerciseCalories}
+          </Text>
+          <Text style={[styles.statLabel, { color: colors.muted }]}>Calories</Text>
         </View>
       </View>
 
       <View style={styles.buttons}>
         {!isActive ? (
-          <TouchableOpacity style={styles.startButton} onPress={onStart}>
-            <Text style={styles.startButtonText}>Start Exercise</Text>
+          <TouchableOpacity
+            style={[styles.mainButton, { backgroundColor: colors.accent }]}
+            onPress={onStart}
+          >
+            <Text style={[styles.mainButtonText, { color: colors.white }]}>
+              Start Exercise
+            </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.stopButton} onPress={onStop}>
-            <Text style={styles.stopButtonText}>Stop Exercise</Text>
+          <TouchableOpacity
+            style={[styles.mainButton, { backgroundColor: colors.danger }]}
+            onPress={onStop}
+          >
+            <Text style={[styles.mainButtonText, { color: colors.white }]}>
+              Stop Exercise
+            </Text>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.resetButton} onPress={onReset}>
-          <Text style={styles.resetButtonText}>Reset</Text>
+        <TouchableOpacity
+          style={[styles.resetButton, { backgroundColor: colors.border }]}
+          onPress={onReset}
+        >
+          <Text style={[styles.resetButtonText, { color: colors.text }]}>Reset</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -68,7 +100,6 @@ export default function ExerciseCard({
 const styles = StyleSheet.create({
   container: {
     marginTop: 18,
-    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 20,
   },
@@ -82,41 +113,28 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#061A4A',
   },
 
   statusBadge: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: '#E5E7EB',
-  },
-
-  activeBadge: {
-    backgroundColor: '#00D5B5',
   },
 
   statusText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#6B7280',
-  },
-
-  activeStatusText: {
-    color: '#FFFFFF',
   },
 
   steps: {
     marginTop: 18,
     fontSize: 42,
     fontWeight: '900',
-    color: '#061A4A',
   },
 
   label: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#6B7280',
     marginTop: 2,
   },
 
@@ -128,7 +146,6 @@ const styles = StyleSheet.create({
 
   statBox: {
     flex: 1,
-    backgroundColor: '#F3F7FF',
     borderRadius: 18,
     padding: 14,
   },
@@ -136,14 +153,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 17,
     fontWeight: '900',
-    color: '#061A4A',
   },
 
   statLabel: {
     marginTop: 4,
     fontSize: 12,
     fontWeight: '700',
-    color: '#6B7280',
   },
 
   buttons: {
@@ -152,32 +167,15 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
 
-  startButton: {
+  mainButton: {
     flex: 1,
     height: 52,
     borderRadius: 18,
-    backgroundColor: '#00D5B5',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  startButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-  },
-
-  stopButton: {
-    flex: 1,
-    height: 52,
-    borderRadius: 18,
-    backgroundColor: '#FF5A5F',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  stopButtonText: {
-    color: '#FFFFFF',
+  mainButtonText: {
     fontSize: 15,
     fontWeight: '900',
   },
@@ -186,13 +184,11 @@ const styles = StyleSheet.create({
     width: 90,
     height: 52,
     borderRadius: 18,
-    backgroundColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   resetButtonText: {
-    color: '#061A4A',
     fontSize: 15,
     fontWeight: '900',
   },
