@@ -7,15 +7,14 @@ import WeeklyGraph from '../../components/WeeklyGraph';
 import GoalSelector from '../../components/GoalSelector';
 import ExerciseCard from '../../components/ExerciseCard';
 import ThemeToggle from '../../components/ThemeToggle';
-import { lightTheme, darkTheme } from '../../constants/theme';
+import { useAppTheme } from '../../contexts/ThemeContext';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
   const [history, setHistory] = useState<Record<string, number>>({});
   const [goal, setGoal] = useState(8000);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const colors = isDarkMode ? darkTheme : lightTheme;
+  const { colors, isDarkMode, toggleTheme } = useAppTheme();
 
   const [isExerciseActive, setIsExerciseActive] = useState(false);
   const [exerciseStartSteps, setExerciseStartSteps] = useState(0);
@@ -29,22 +28,6 @@ export default function HomeScreen() {
 
   const exerciseDistanceKm = ((exerciseSteps * stepLengthMeters) / 1000).toFixed(2);
   const exerciseCalories = Math.round(exerciseSteps * caloriesPerStep);
-
-useEffect(() => {
-  const loadTheme = async () => {
-    try {
-      const storedTheme = await AsyncStorage.getItem('themeMode');
-
-      if (storedTheme === 'dark') {
-        setIsDarkMode(true);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  loadTheme();
-}, []);
 
 useEffect(() => {
   const loadGoal = async () => {
@@ -153,17 +136,6 @@ const handleChangeGoal = async (newGoal: number) => {
   }
 };
 
-const handleToggleTheme = async () => {
-  try {
-    const nextValue = !isDarkMode;
-
-    setIsDarkMode(nextValue);
-    await AsyncStorage.setItem('themeMode', nextValue ? 'dark' : 'light');
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 useEffect(() => {
   if (isExerciseActive) {
     const currentExerciseSteps = Math.max(steps - exerciseStartSteps, 0);
@@ -193,11 +165,11 @@ return (
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.text }]}>Walk N More</Text>
 
-        <ThemeToggle
-          isDarkMode={isDarkMode}
-          onToggle={handleToggleTheme}
-          colors={colors}
-        />
+       <ThemeToggle
+         isDarkMode={isDarkMode}
+         onToggle={toggleTheme}
+         colors={colors}
+       />
 
           <ProgressRing steps={steps} goal={goal} colors={colors} />
 
@@ -227,6 +199,9 @@ return (
 </View>
 
           <WeeklyGraph history={history} colors={colors} />
+          <Text style={[styles.footerText, { color: colors.muted }]}>
+            Powered by VikingGroup. All Rights Reserved.
+          </Text>
         </View>
       </ScrollView>
     </LinearGradient>
@@ -347,5 +322,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#008CFF',
     letterSpacing: 1.2,
+  },
+footerText: {
+    marginTop: 8,
+    marginBottom: 24,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
