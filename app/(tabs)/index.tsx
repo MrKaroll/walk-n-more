@@ -10,8 +10,13 @@ import GoalSelector from '../../components/GoalSelector';
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
   const [history, setHistory] = useState<Record<string, number>>({});
-
   const [goal, setGoal] = useState(8000);
+
+  const stepLengthMeters = 0.75;
+  const caloriesPerStep = 0.04;
+
+  const distanceKm = ((steps * stepLengthMeters) / 1000).toFixed(1);
+  const calories = Math.round(steps * caloriesPerStep);
 
 useEffect(() => {
   const loadGoal = async () => {
@@ -134,12 +139,12 @@ const handleChangeGoal = async (newGoal: number) => {
 
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>0.9 km</Text>
+              <Text style={styles.statValue}>{distanceKm} km</Text>
               <Text style={styles.statLabel}>Distance</Text>
             </View>
 
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>120</Text>
+              <Text style={styles.statValue}>{calories}</Text>
               <Text style={styles.statLabel}>Calories</Text>
             </View>
           </View>
