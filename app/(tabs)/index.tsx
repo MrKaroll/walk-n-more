@@ -5,12 +5,29 @@ import ProgressRing from '../../components/ProgressRing';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import WeeklyGraph from '../../components/WeeklyGraph';
 import DailyGoalCard from '../../components/DailyGoalCard';
+import GoalSelector from '../../components/GoalSelector';
 
 export default function HomeScreen() {
   const [steps, setSteps] = useState(0);
   const [history, setHistory] = useState<Record<string, number>>({});
 
-  const goal = 8000;
+  const [goal, setGoal] = useState(8000);
+
+useEffect(() => {
+  const loadGoal = async () => {
+    try {
+      const storedGoal = await AsyncStorage.getItem('dailyGoal');
+
+      if (storedGoal) {
+        setGoal(Number(storedGoal));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  loadGoal();
+}, []);
 
   // 1. Päris sammude lugemine telefoni sensorist
   useEffect(() => {
@@ -94,63 +111,55 @@ export default function HomeScreen() {
     saveHistory();
   }, [steps]);
 
-return (
+const handleChangeGoal = async (newGoal: number) => {
+  try {
+    setGoal(newGoal);
+    await AsyncStorage.setItem('dailyGoal', String(newGoal));
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-  <LinearGradient
-    colors={['#F3FFF8', '#EEF9FF', '#F7F9FC']}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-    style={styles.screen}
-  >
-    <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Walk N More</Text>
+  return (
+    <LinearGradient colors={['#E8FDF8', '#EEF3FF']} style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Walk N More</Text>
 
-      <View style={styles.heroCard}>
-        <View style={styles.brandBlock}>
-          <Text style={styles.brandTitle}>Walk N More</Text>
-          <Text style={styles.brandTagline}>WALK • RESET • BE BETTER</Text>
+          <ProgressRing steps={steps} goal={goal} />
+
+          <DailyGoalCard steps={steps} goal={goal} />
+
+          <GoalSelector goal={goal} onChangeGoal={handleChangeGoal} />
+
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>0.9 km</Text>
+              <Text style={styles.statLabel}>Distance</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>120</Text>
+              <Text style={styles.statLabel}>Calories</Text>
+            </View>
+          </View>
+
+          <WeeklyGraph history={history} />
         </View>
-
-        <Text style={styles.cardLabel}>Daily steps</Text>
-
-        <ProgressRing progress={steps / goal} steps={steps} />
-
-        <Text style={styles.goalText}>Goal: {goal}</Text>
-      </View>
-
-      <View style={styles.statsRow}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>0.9 km</Text>
-          <Text style={styles.statLabel}>Distance</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>48 kcal</Text>
-          <Text style={styles.statLabel}>Calories</Text>
-        </View>
-      </View>
-
-      <View style={styles.motivationCard}>
-        <Text style={styles.motivationTitle}>One step at a time.</Text>
-        <Text style={styles.motivationText}>Small walks still count.</Text>
-      </View>
-
-      <TouchableOpacity style={styles.primaryButton}>
-        <Text style={styles.primaryButtonText}>Start walking</Text>
-      </TouchableOpacity>
-
-      <WeeklyGraph history={history} />
-    </ScrollView>
-  </LinearGradient>
-);
+      </ScrollView>
+    </LinearGradient>
+  );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
-    backgroundColor: '#F7F9FC',
+  },
+
+  content: {
     padding: 24,
     paddingTop: 70,
+    paddingBottom: 40,
   },
 
   title: {
@@ -172,7 +181,6 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: 20,
   },
-
 
   goalText: {
     marginTop: 20,
@@ -240,22 +248,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-brandBlock: {
-  alignItems: 'center',
-  marginBottom: 22,
-},
+  brandBlock: {
+    alignItems: 'center',
+    marginBottom: 22,
+  },
 
-brandTitle: {
-  fontSize: 28,
-  fontWeight: '900',
-  color: '#061A4A',
-},
+  brandTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#061A4A',
+  },
 
-brandTagline: {
-  marginTop: 6,
-  fontSize: 12,
-  fontWeight: '800',
-  color: '#008CFF',
-  letterSpacing: 1.2,
-},
+  brandTagline: {
+    marginTop: 6,
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#008CFF',
+    letterSpacing: 1.2,
+  },
 });
